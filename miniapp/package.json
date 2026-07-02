@@ -1,0 +1,25 @@
+{
+  "name": "tg-shop-miniapp",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@telegram-apps/sdk-react": "^2.0.0",
+    "@telegram-apps/telegram-ui": "^2.1.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0"
+  }
+}

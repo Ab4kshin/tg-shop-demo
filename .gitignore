@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Env / секреты
+.env
+.env.*
+!.env.example
+
+# База данных
+*.sqlite3
+*.sqlite3-journal
+data/
+
+# Node / фронтенд
+node_modules/
+dist/
+.vite/
+*.local
+
+# Логи локального запуска (tgshop.sh dev)
+logs/
+
+# ОС / редакторы
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

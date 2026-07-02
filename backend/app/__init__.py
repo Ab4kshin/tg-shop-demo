@@ -1,0 +1,1 @@
+"""TG Shop backend package."""
