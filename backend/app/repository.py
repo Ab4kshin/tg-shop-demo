@@ -99,6 +99,7 @@ def create_order(
     items: List[Tuple[int, int]],
     note: str = "",
     method: str = "mock",
+    user_lang: str = "",
 ) -> Tuple[int, int]:
     """Создать заказ. Сумма считается НА СЕРВЕРЕ по ценам из БД."""
     if not items:
@@ -124,9 +125,9 @@ def create_order(
 
     cur = conn.execute(
         """INSERT INTO orders
-               (user_tg_id, user_name, status, total_kopecks, note, payment_method)
-           VALUES (?, ?, 'new', ?, ?, ?)""",
-        (user_tg_id, user_name, total, note, method),
+               (user_tg_id, user_name, user_lang, status, total_kopecks, note, payment_method)
+           VALUES (?, ?, ?, 'new', ?, ?, ?)""",
+        (user_tg_id, user_name, user_lang, total, note, method),
     )
     order_id = cur.lastrowid
     conn.executemany(
@@ -144,6 +145,16 @@ def set_order_payment(
     conn.execute(
         f"UPDATE orders SET payment_id = ?, updated_at = {_NOW} WHERE id = ?",
         (payment_id, order_id),
+    )
+
+
+def set_order_ton(
+    conn: sqlite3.Connection, order_id: int, amount_nano: int, comment: str
+) -> None:
+    """Сохранить выставленную сумму (нано-TON / единицы жетона) и комментарий."""
+    conn.execute(
+        f"UPDATE orders SET pay_amount_nano = ?, pay_comment = ?, updated_at = {_NOW} WHERE id = ?",
+        (amount_nano, comment, order_id),
     )
 
 
@@ -279,3 +290,74 @@ def stats(conn: sqlite3.Connection) -> dict:
             for r in top
         ],
     }
+
+
+# Категории
+def list_categories(conn: sqlite3.Connection) -> List[str]:
+    rows = conn.execute("SELECT name FROM categories ORDER BY name").fetchall()
+    return [r["name"] for r in rows]
+
+
+def create_category(conn: sqlite3.Connection, name: str) -> str:
+    conn.execute("INSERT OR IGNORE INTO categories (name) VALUES (?)", (name,))
+    return name
+
+
+def category_in_use(conn: sqlite3.Connection, name: str) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM products WHERE category = ? LIMIT 1", (name,)
+    ).fetchone()
+    return row is not None
+
+
+def delete_category(conn: sqlite3.Connection, name: str) -> None:
+    conn.execute("DELETE FROM categories WHERE name = ?", (name,))
+
+
+def get_user_lang(conn: sqlite3.Connection, user_tg_id: int) -> Optional[str]:
+    row = conn.execute(
+        "SELECT lang FROM user_prefs WHERE user_tg_id = ?", (user_tg_id,)
+    ).fetchone()
+    if row and row["lang"] in ("ru", "en"):
+        return row["lang"]
+    return None
+
+
+def set_user_lang(conn: sqlite3.Connection, user_tg_id: int, lang: str) -> None:
+    conn.execute(
+        "INSERT INTO user_prefs (user_tg_id, lang) VALUES (?, ?) "
+        "ON CONFLICT(user_tg_id) DO UPDATE SET lang = excluded.lang",
+        (user_tg_id, lang),
+    )
+
+
+def get_setting(conn: sqlite3.Connection, key: str) -> Optional[str]:
+    row = conn.execute(
+        "SELECT value FROM app_settings WHERE key = ?", (key,)
+    ).fetchone()
+    return row["value"] if row else None
+
+
+def set_setting(conn: sqlite3.Connection, key: str, value: str) -> None:
+    conn.execute(
+        "INSERT INTO app_settings (key, value) VALUES (?, ?) "
+        "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        (key, value),
+    )
+
+
+def get_admin_lang(conn: sqlite3.Connection) -> Optional[str]:
+    """Язык админских уведомлений из настроек (или None — тогда берём из .env)."""
+    val = get_setting(conn, "admin_lang")
+    return val if val in ("ru", "en") else None
+
+
+def product_in_orders(conn: sqlite3.Connection, product_id: int) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM order_items WHERE product_id = ? LIMIT 1", (product_id,)
+    ).fetchone()
+    return row is not None
+
+
+def delete_product(conn: sqlite3.Connection, product_id: int) -> None:
+    conn.execute("DELETE FROM products WHERE id = ?", (product_id,))

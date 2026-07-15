@@ -6,6 +6,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
 
+from .. import messages
 from .. import notifier
 from .. import repository as repo
 from ..config import get_settings
@@ -33,13 +34,21 @@ def mock_pay(order_id: int):
     if newly_paid and order:
         total = order["total_kopecks"] / 100
         lines = ", ".join(f"{i['title']} x{i['qty']}" for i in items)
+        # Уведомление админу — на языке, который покупатель выбрал в /start.
+        user_lang = messages.norm_lang(order.get("user_lang"))
         notifier.notify_user(
             order["user_tg_id"],
-            f"✅ Оплата получена!\nЗаказ №{order_id} на {total:.2f} ₽ оплачен.",
+            messages.user_paid(user_lang, order_id, total),
         )
         notifier.notify_admin(
-            f"🟢 (ТЕСТ) Новый оплаченный заказ №{order_id} на {total:.2f} ₽\n"
-            f"От: {order['user_name']}\nСостав: {lines}",
+            messages.admin_paid(
+                user_lang,
+                order_id,
+                total,
+                order["user_name"],
+                lines,
+                test=True,
+            )
         )
 
     return """<!doctype html>

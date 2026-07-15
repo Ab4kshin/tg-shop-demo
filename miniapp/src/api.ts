@@ -1,6 +1,7 @@
 import { getInitData } from "./telegram"
 import type {
   CreateOrderResult,
+  Currency,
   Order,
   PaymentMethod,
   Product,
@@ -39,6 +40,17 @@ export async function fetchProducts(category?: string): Promise<Product[]> {
   return handle<Product[]>(resp)
 }
 
+export async function fetchCategories(): Promise<string[]> {
+  const resp = await fetch(`${API_URL}/api/categories`, { headers: headers() })
+  return handle<string[]>(resp)
+}
+
+export async function fetchCurrencies(): Promise<Currency[]> {
+  const resp = await fetch(`${API_URL}/api/currencies`, { headers: headers() })
+  const data = await handle<{ base: string; currencies: Currency[] }>(resp)
+  return data.currencies
+}
+
 export async function fetchPaymentMethods(): Promise<PaymentMethod[]> {
   const resp = await fetch(`${API_URL}/api/payment-methods`, {
     headers: headers(),
@@ -66,6 +78,15 @@ export async function claimPaid(orderId: number): Promise<void> {
       headers: headers(),
     }),
   )
+}
+
+export async function checkTonPayment(
+  orderId: number,
+): Promise<{ status: string }> {
+  const resp = await fetch(`${API_URL}/api/ton/check/${orderId}`, {
+    headers: headers(),
+  })
+  return handle<{ status: string }>(resp)
 }
 
 export async function fetchMyOrders(): Promise<Order[]> {

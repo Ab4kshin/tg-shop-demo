@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, field_validator
 
 CATEGORIES = ["День рождения", "Свадьба", "Извинение", "Без повода"]
 STATUSES = ["new", "paid", "shipped", "done", "canceled"]
-METHODS = ["mock", "crypto", "card"]
+METHODS = ["mock", "robokassa", "ton", "usdt_ton", "crypto", "card"]
 
 
 class ProductOut(BaseModel):
@@ -68,11 +68,34 @@ class ManualInstructions(BaseModel):
     qr_svg: str = ""
 
 
+class TonPaymentOut(BaseModel):
+    order_id: int
+    address: str
+    amount_nano: str
+    amount_ton: str
+    amount_rub: float
+    comment: str
+    network: str
+    manifest_url: str = ""
+    expires_at: int
+    # Актив: "ton" (нативная монета) или "usdt" (жетон jUSDT).
+    asset: str = "ton"
+    asset_label: str = "TON"
+    jetton_master: str = ""       # адрес мастер-контракта жетона (для usdt)
+    amount_units: str = ""        # минимальные единицы жетона (для usdt)
+    usdt_decimals: int = 6
+
+
+class TonStatusOut(BaseModel):
+    status: str
+
+
 class OrderCreateResult(BaseModel):
     order_id: int
-    kind: str  # "redirect" | "manual"
+    kind: str  # "redirect" | "manual" | "ton"
     confirmation_url: Optional[str] = None
     instructions: Optional[ManualInstructions] = None
+    ton: Optional[TonPaymentOut] = None
 
 
 class PaymentMethodOut(BaseModel):
@@ -100,9 +123,9 @@ class ProductIn(BaseModel):
     @field_validator("category")
     @classmethod
     def _check_category(cls, v: str) -> str:
-        if v not in CATEGORIES:
-            raise ValueError(f"недопустимая категория: {v}")
-        return v
+        if not v or not v.strip():
+            raise ValueError("категория не может быть пустой")
+        return v.strip()
 
 
 class ProductUpdate(BaseModel):
@@ -116,9 +139,9 @@ class ProductUpdate(BaseModel):
     @field_validator("category")
     @classmethod
     def _check_category(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and v not in CATEGORIES:
-            raise ValueError(f"недопустимая категория: {v}")
-        return v
+        if v is not None and (not v or not v.strip()):
+            raise ValueError("категория не может быть пустой")
+        return v.strip() if v is not None else v
 
 
 class OrderStatusUpdate(BaseModel):
@@ -130,3 +153,24 @@ class OrderStatusUpdate(BaseModel):
         if v not in STATUSES:
             raise ValueError(f"недопустимый статус: {v}")
         return v
+
+
+class CategoryIn(BaseModel):
+    name: str = Field(min_length=1)
+
+    @field_validator("name")
+    @classmethod
+    def _clean(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("название категории не может быть пустым")
+        return v
+
+
+class UserLangIn(BaseModel):
+    user_tg_id: int
+    lang: str
+
+
+class AdminLangIn(BaseModel):
+    lang: str

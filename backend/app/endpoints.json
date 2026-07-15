@@ -1,0 +1,6 @@
+{
+  "robokassa_url": "https://auth.robokassa.ru/Merchant/Index.aspx",
+  "ton_rate_url": "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=rub",
+  "usdt_rate_url": "https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=rub",
+  "fiat_rate_url": "https://open.er-api.com/v6/latest/RUB"
+}

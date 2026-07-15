@@ -1,14 +1,32 @@
 import { useEffect, useState } from "react"
-import { fetchProducts } from "../api"
+import { fetchCategories, fetchProducts } from "../api"
 import { CategoryTabs } from "../components/CategoryTabs"
 import { ProductCard } from "../components/ProductCard"
+import { useI18n } from "../i18n"
+import { CATEGORIES } from "../types"
 import type { Product } from "../types"
 
 export function Catalog() {
+  const { t } = useI18n()
   const [category, setCategory] = useState<string | null>(null)
+  const [categories, setCategories] = useState<string[]>([...CATEGORIES])
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    fetchCategories()
+      .then((data) => {
+        if (active && data.length) setCategories(data)
+      })
+      .catch(() => {
+        /* оставляем дефолтные категории */
+      })
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -31,12 +49,16 @@ export function Catalog() {
 
   return (
     <div className="page">
-      <h1 className="page__title">Магазин подарков</h1>
-      <CategoryTabs active={category} onChange={setCategory} />
-      {loading && <p className="hint">Загрузка…</p>}
+      <h1 className="page__title">{t("shop_title")}</h1>
+      <CategoryTabs
+        categories={categories}
+        active={category}
+        onChange={setCategory}
+      />
+      {loading && <p className="hint">{t("loading")}</p>}
       {error && <p className="error">{error}</p>}
       {!loading && !error && products.length === 0 && (
-        <p className="hint">Ничего не найдено.</p>
+        <p className="hint">{t("nothing_found")}</p>
       )}
       <div className="grid">
         {products.map((product) => (

@@ -1,8 +1,10 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
 import { login, setToken } from "../api"
+import { useI18n } from "../i18n"
 
 export function Login({ onSuccess }: { onSuccess: () => void }) {
+  const { t } = useI18n()
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -25,18 +27,18 @@ export function Login({ onSuccess }: { onSuccess: () => void }) {
   return (
     <div className="login">
       <form className="login__card" onSubmit={submit}>
-        <h1>Вход в админку</h1>
-        <p className="muted">Введите пароль администратора</p>
+        <h1>{t("login_title")}</h1>
+        <p className="muted">{t("login_hint")}</p>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Пароль"
+          placeholder={t("password_ph")}
           autoFocus
         />
         {error && <div className="error">{error}</div>}
         <button className="btn btn--primary" disabled={loading || !password}>
-          {loading ? "Входим…" : "Войти"}
+          {loading ? t("signing_in") : t("sign_in")}
         </button>
       </form>
     </div>

@@ -7,11 +7,3 @@ export function formatPrice(kopecks: number): string {
     }) + "\u00a0₽"
   )
 }
-
-export const STATUS_LABELS: Record<string, string> = {
-  new: "Ожидает оплаты",
-  paid: "Оплачен",
-  shipped: "Отправлен",
-  done: "Завершён",
-  canceled: "Отменён",
-}

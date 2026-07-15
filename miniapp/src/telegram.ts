@@ -3,6 +3,9 @@ interface TgWebApp {
   initData: string
   colorScheme: "light" | "dark"
   themeParams: Record<string, string>
+  viewportHeight?: number
+  viewportStableHeight?: number
+  initDataUnsafe?: { user?: { language_code?: string } }
   ready: () => void
   expand: () => void
   openLink: (url: string) => void
@@ -24,10 +27,28 @@ export function initTelegram(): void {
   if (!app) return
   app.ready()
   app.expand()
+  syncViewport()
+  app.onEvent("viewportChanged", syncViewport)
+}
+
+// Привязываем высоту приложения к стабильной высоте вьюпорта Telegram.
+// Без этого на десктопе/Mac 100dvh больше видимой области и таббар «съезжает».
+export function syncViewport(): void {
+  const app = tg()
+  if (!app) return
+  const h = app.viewportStableHeight || app.viewportHeight
+  if (h && h > 0) {
+    document.documentElement.style.setProperty("--app-height", `${h}px`)
+  }
 }
 
 export function getInitData(): string {
   return tg()?.initData ?? ""
+}
+
+// Язык пользователя из Telegram (например, "ru", "en") — для выбора языка по умолчанию.
+export function getLanguageCode(): string {
+  return tg()?.initDataUnsafe?.user?.language_code ?? ""
 }
 
 // Переносим тему Telegram в CSS-переменные --tg-theme-*.

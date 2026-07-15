@@ -1,11 +1,13 @@
-import { CATEGORIES } from "../types"
+import { categoryLabel, useI18n } from "../i18n"
 
 interface Props {
+  categories: string[]
   active: string | null
   onChange: (category: string | null) => void
 }
 
-export function CategoryTabs({ active, onChange }: Props) {
+export function CategoryTabs({ categories, active, onChange }: Props) {
+  const { lang, t } = useI18n()
   return (
     <div className="chips">
       <button
@@ -13,16 +15,16 @@ export function CategoryTabs({ active, onChange }: Props) {
         className={`chip ${active === null ? "chip--active" : ""}`}
         onClick={() => onChange(null)}
       >
-        Все
+        {t("category_all")}
       </button>
-      {CATEGORIES.map((category) => (
+      {categories.map((category) => (
         <button
           key={category}
           type="button"
           className={`chip ${active === category ? "chip--active" : ""}`}
           onClick={() => onChange(category)}
         >
-          {category}
+          {categoryLabel(lang, category)}
         </button>
       ))}
     </div>

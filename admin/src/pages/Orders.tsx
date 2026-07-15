@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react"
 import { fetchOrders, updateOrderStatus } from "../api"
+import { useCurrency } from "../currency"
+import { methodLabel, statusLabel, useI18n } from "../i18n"
 import { STATUSES } from "../types"
 import type { AdminOrder } from "../types"
-import { formatPrice, METHOD_LABELS, STATUS_LABELS } from "../utils"
 
 export function Orders() {
+  const { lang, t } = useI18n()
+  const { format } = useCurrency()
   const [orders, setOrders] = useState<AdminOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -37,25 +40,25 @@ export function Orders() {
   return (
     <div className="page">
       <div className="page__head">
-        <h1>Заказы</h1>
+        <h1>{t("orders_title")}</h1>
         <button className="btn" onClick={load}>
-          Обновить
+          {t("refresh")}
         </button>
       </div>
       {error && <div className="error">{error}</div>}
       {loading ? (
-        <p className="muted">Загрузка…</p>
+        <p className="muted">{t("loading")}</p>
       ) : (
         <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
-                <th>№</th>
-                <th>Покупатель</th>
-                <th>Состав</th>
-                <th>Способ</th>
-                <th>Сумма</th>
-                <th>Статус</th>
+                <th>{t("col_num")}</th>
+                <th>{t("col_customer")}</th>
+                <th>{t("col_items")}</th>
+                <th>{t("col_method")}</th>
+                <th>{t("col_amount")}</th>
+                <th>{t("col_status")}</th>
               </tr>
             </thead>
             <tbody>
@@ -71,8 +74,8 @@ export function Orders() {
                       .map((item) => `${item.title} ×${item.qty}`)
                       .join(", ")}
                   </td>
-                  <td>{METHOD_LABELS[order.payment_method] ?? order.payment_method}</td>
-                  <td>{formatPrice(order.total_kopecks)}</td>
+                  <td>{methodLabel(lang, order.payment_method)}</td>
+                  <td>{format(order.total_kopecks)}</td>
                   <td>
                     <select
                       value={order.status}
@@ -80,7 +83,7 @@ export function Orders() {
                     >
                       {STATUSES.map((s) => (
                         <option key={s} value={s}>
-                          {STATUS_LABELS[s]}
+                          {statusLabel(lang, s)}
                         </option>
                       ))}
                     </select>
@@ -90,7 +93,7 @@ export function Orders() {
               {orders.length === 0 && (
                 <tr>
                   <td colSpan={6} className="muted">
-                    Заказов нет.
+                    {t("no_orders")}
                   </td>
                 </tr>
               )}

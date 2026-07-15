@@ -3,10 +3,12 @@ import { claimPaid, createOrder, fetchPaymentMethods } from "../api"
 import { CartItemRow } from "../components/CartItemRow"
 import { PaymentInstructions } from "../components/PaymentInstructions"
 import { PaymentMethodPicker } from "../components/PaymentMethodPicker"
+import { TonPaymentPanel } from "../components/TonPaymentPanel"
+import { useCurrency } from "../currency"
+import { useI18n } from "../i18n"
 import { useCart } from "../store/cart"
 import { openPayment } from "../telegram"
-import type { ManualInstructions, PaymentMethod } from "../types"
-import { formatPrice } from "../utils"
+import type { ManualInstructions, PaymentMethod, TonPayment } from "../types"
 
 interface Props {
   onGoCatalog: () => void
@@ -14,12 +16,17 @@ interface Props {
 }
 
 export function Cart({ onGoCatalog, onDone }: Props) {
+  const { t } = useI18n()
+  const { format } = useCurrency()
   const { lines, setQty, remove, totalKopecks, clear } = useCart()
   const [methods, setMethods] = useState<PaymentMethod[]>([])
   const [method, setMethod] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [instructions, setInstructions] = useState<ManualInstructions | null>(null)
+  const [instructions, setInstructions] = useState<ManualInstructions | null>(
+    null,
+  )
+  const [tonPayment, setTonPayment] = useState<TonPayment | null>(null)
   const [manualOrderId, setManualOrderId] = useState<number | null>(null)
   const [claimed, setClaimed] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -51,6 +58,7 @@ export function Cart({ onGoCatalog, onDone }: Props) {
     try {
       await claimPaid(manualOrderId)
       setClaimed(true)
+      clear()
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -69,19 +77,25 @@ export function Cart({ onGoCatalog, onDone }: Props) {
       }))
       const result = await createOrder(items, method)
       if (result.kind === "redirect" && result.confirmation_url) {
-        clear()
         openPayment(result.confirmation_url)
         onDone()
+      } else if (result.kind === "ton" && result.ton) {
+        setTonPayment(result.ton)
       } else if (result.kind === "manual" && result.instructions) {
         setManualOrderId(result.order_id)
         setInstructions(result.instructions)
-        clear()
       }
     } catch (e) {
       setError((e as Error).message)
     } finally {
       setLoading(false)
     }
+  }
+
+  if (tonPayment) {
+    return (
+      <TonPaymentPanel payment={tonPayment} onPaid={clear} onDone={onDone} />
+    )
   }
 
   if (instructions) {
@@ -102,10 +116,14 @@ export function Cart({ onGoCatalog, onDone }: Props) {
   if (lines.length === 0) {
     return (
       <div className="page">
-        <h1 className="page__title">Корзина</h1>
-        <p className="hint">Корзина пуста.</p>
-        <button type="button" className="btn btn--primary btn--block" onClick={onGoCatalog}>
-          Перейти в каталог
+        <h1 className="page__title">{t("cart_title")}</h1>
+        <p className="hint">{t("cart_empty")}</p>
+        <button
+          type="button"
+          className="btn btn--primary btn--block"
+          onClick={onGoCatalog}
+        >
+          {t("go_to_catalog")}
         </button>
       </div>
     )
@@ -113,7 +131,7 @@ export function Cart({ onGoCatalog, onDone }: Props) {
 
   return (
     <div className="page">
-      <h1 className="page__title">Корзина</h1>
+      <h1 className="page__title">{t("cart_title")}</h1>
       <div className="cart-list">
         {lines.map((line) => (
           <CartItemRow
@@ -126,11 +144,15 @@ export function Cart({ onGoCatalog, onDone }: Props) {
       </div>
 
       <div className="cart-total">
-        <span>Итого</span>
-        <strong>{formatPrice(totalKopecks)}</strong>
+        <span>{t("total")}</span>
+        <strong>{format(totalKopecks)}</strong>
       </div>
 
-      <PaymentMethodPicker methods={methods} selected={method} onSelect={setMethod} />
+      <PaymentMethodPicker
+        methods={methods}
+        selected={method}
+        onSelect={setMethod}
+      />
 
       {error && <p className="error">{error}</p>}
 
@@ -141,7 +163,7 @@ export function Cart({ onGoCatalog, onDone }: Props) {
           disabled={loading || !method}
           onClick={checkout}
         >
-          {loading ? "Создаём заказ…" : "Оформить и оплатить"}
+          {loading ? t("creating_order") : t("checkout")}
         </button>
       )}
     </div>

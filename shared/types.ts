@@ -1,4 +1,13 @@
 // Единый источник общих типов для мини-аппки и админки.
+export type Lang = "ru" | "en"
+
+export interface Currency {
+  code: string
+  symbol: string
+  locale: string
+  rub_per_unit: number
+}
+
 export interface Product {
   id: number
   title: string

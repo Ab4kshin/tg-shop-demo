@@ -1,6 +1,6 @@
-import type { OrderItem, Product } from "../../shared/types"
+import type { Currency, OrderItem, Product } from "../../shared/types"
 
-export type { OrderItem, Product }
+export type { Currency, OrderItem, Product }
 
 export const CATEGORIES = [
   "День рождения",

@@ -1,5 +1,7 @@
+import type { CSSProperties } from "react"
+import { useCurrency } from "../currency"
+import { useI18n } from "../i18n"
 import type { CartLine } from "../store/cart"
-import { formatPrice } from "../utils"
 
 interface Props {
   line: CartLine
@@ -8,16 +10,18 @@ interface Props {
 }
 
 export function CartItemRow({ line, onQtyChange, onRemove }: Props) {
+  const { t } = useI18n()
+  const { format } = useCurrency()
+  const imageStyle: CSSProperties = {
+    backgroundImage: `url(${line.product.photo_url})`,
+  }
   return (
     <div className="cart-item">
-      <div
-        className="cart-item__image"
-        style={{ backgroundImage: `url(${line.product.photo_url})` }}
-      />
+      <div className="cart-item__image" style={imageStyle} />
       <div className="cart-item__info">
         <div className="cart-item__title">{line.product.title}</div>
         <div className="cart-item__price">
-          {formatPrice(line.product.price_kopecks)}
+          {format(line.product.price_kopecks)}
         </div>
       </div>
       <div className="qty">
@@ -41,7 +45,7 @@ export function CartItemRow({ line, onQtyChange, onRemove }: Props) {
         type="button"
         className="cart-item__remove"
         onClick={onRemove}
-        aria-label="Удалить"
+        aria-label={t("remove")}
       >
         ✕
       </button>

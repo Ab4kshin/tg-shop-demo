@@ -1,13 +1,15 @@
 import type { FormEvent } from "react"
-import { CATEGORIES } from "../types"
+import { categoryLabel, useI18n } from "../i18n"
 import type { ProductInput } from "../types"
 
 interface Props {
   editingId: number | null
   form: ProductInput
+  categories: string[]
   onChange: (form: ProductInput) => void
-  priceRub: string
-  onPriceRubChange: (value: string) => void
+  priceValue: string
+  currencySymbol: string
+  onPriceChange: (value: string) => void
   onSubmit: (e: FormEvent) => void
   onCancel: () => void
 }
@@ -15,17 +17,22 @@ interface Props {
 export function ProductForm({
   editingId,
   form,
+  categories,
   onChange,
-  priceRub,
-  onPriceRubChange,
+  priceValue,
+  currencySymbol,
+  onPriceChange,
   onSubmit,
   onCancel,
 }: Props) {
+  const { lang, t } = useI18n()
   return (
     <form className="form-card" onSubmit={onSubmit}>
-      <h2>{editingId ? `Редактирование #${editingId}` : "Новый товар"}</h2>
+      <h2>
+        {editingId ? t("form_edit", { id: editingId }) : t("form_new")}
+      </h2>
       <label>
-        Название
+        {t("f_title")}
         <input
           value={form.title}
           onChange={(e) => onChange({ ...form, title: e.target.value })}
@@ -33,7 +40,7 @@ export function ProductForm({
         />
       </label>
       <label>
-        Описание
+        {t("f_description")}
         <textarea
           value={form.description}
           onChange={(e) => onChange({ ...form, description: e.target.value })}
@@ -41,32 +48,32 @@ export function ProductForm({
         />
       </label>
       <label>
-        Цена, ₽
+        {t("f_price")}, {currencySymbol}
         <input
           type="number"
           min="0"
           step="0.01"
-          value={priceRub}
-          onChange={(e) => onPriceRubChange(e.target.value)}
+          value={priceValue}
+          onChange={(e) => onPriceChange(e.target.value)}
           required
         />
       </label>
       <label>
-        Фото (URL)
+        {t("f_photo")}
         <input
           value={form.photo_url}
           onChange={(e) => onChange({ ...form, photo_url: e.target.value })}
         />
       </label>
       <label>
-        Категория
+        {t("f_category")}
         <select
           value={form.category}
           onChange={(e) => onChange({ ...form, category: e.target.value })}
         >
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <option key={c} value={c}>
-              {c}
+              {categoryLabel(lang, c)}
             </option>
           ))}
         </select>
@@ -77,15 +84,15 @@ export function ProductForm({
           checked={form.is_active}
           onChange={(e) => onChange({ ...form, is_active: e.target.checked })}
         />
-        Активен
+        {t("f_active")}
       </label>
       <div className="form-actions">
         <button type="submit" className="btn btn--primary">
-          {editingId ? "Сохранить" : "Добавить"}
+          {editingId ? t("save") : t("add")}
         </button>
         {editingId && (
           <button type="button" className="btn" onClick={onCancel}>
-            Отмена
+            {t("cancel")}
           </button>
         )}
       </div>

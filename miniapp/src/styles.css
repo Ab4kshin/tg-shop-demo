@@ -12,6 +12,8 @@
 
 * {
   box-sizing: border-box;
+  /* Убираем синюю вспышку при нажатии (как в нативных мини-аппах). */
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -32,14 +34,20 @@ body {
 }
 
 .app {
+  position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  height: var(--app-height, 100dvh);
+  overflow: hidden;
 }
 
 .app__content {
   flex: 1;
-  padding-bottom: 72px;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .page {
@@ -318,10 +326,7 @@ body {
 
 /* Нижняя навигация */
 .tabbar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex-shrink: 0;
   display: flex;
   background: var(--bg);
   border-top: 1px solid rgba(127, 127, 127, 0.2);
@@ -448,4 +453,83 @@ body {
   padding: 12px 14px;
   margin-bottom: 12px;
   font-size: 14px;
+}
+
+/* Верхняя панель: название магазина + переключатель языка. */
+.app__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
+  background: var(--bg);
+  border-bottom: 1px solid rgba(127, 127, 127, 0.15);
+}
+
+.app__brand {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Переключатель языка RU/EN */
+.lang-switch {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 2px;
+  background: var(--secondary-bg);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.lang-switch__btn {
+  border: none;
+  background: transparent;
+  color: var(--hint);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lang-switch__btn.is-active {
+  background: var(--button);
+  color: var(--button-text);
+}
+
+/* Группа контролов в шапке: переключатели валюты и языка. */
+.app__controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cur-switch {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--tg-theme-secondary-bg-color, rgba(127, 127, 127, 0.12));
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.cur-switch__btn {
+  border: none;
+  background: transparent;
+  color: var(--tg-theme-hint-color, #8e8e93);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.cur-switch__btn.is-active {
+  background: var(--tg-theme-button-color, #2783de);
+  color: var(--tg-theme-button-text-color, #fff);
 }

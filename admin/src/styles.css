@@ -89,6 +89,17 @@ h2 {
   cursor: default;
 }
 
+.btn--danger {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.btn--danger:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
 /* Вход */
 .login {
   min-height: 100vh;
@@ -200,8 +211,39 @@ h2 {
   font-weight: 600;
 }
 
-.sidebar__logout {
+.sidebar__footer {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  gap: 2px;
+  align-self: flex-start;
+  background: var(--soft);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.lang-switch__btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lang-switch__btn.is-active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.sidebar__logout {
   border: 1px solid var(--border);
   background: var(--canvas);
   padding: 9px 12px;
@@ -367,4 +409,138 @@ h2 {
     width: 160px;
     flex-basis: 160px;
   }
+}
+
+/* Тёмная тема — переопределяем CSS-переменные. */
+[data-theme="dark"] {
+  --text: #e8e6e3;
+  --muted: #9a968f;
+  --canvas: #1f1f1f;
+  --soft: #151515;
+  --surface: #2b2b2b;
+  --border: #343330;
+  --accent: #4a9eea;
+  --accent-soft: #17324a;
+  --green: #4bb27f;
+  --red: #e56458;
+}
+
+[data-theme="dark"] .error {
+  background: #3a201d;
+  color: #f0a89f;
+  border-color: #5a2b26;
+}
+
+[data-theme="dark"] .stat-card--accent {
+  border-color: var(--accent-soft);
+}
+
+[data-theme="dark"] .login__card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Переключатель валюты в сайдбаре. */
+.cur-switch {
+  display: inline-flex;
+  gap: 2px;
+  align-self: flex-start;
+  background: var(--soft);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.cur-switch__btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.cur-switch__btn.is-active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Переключатель темы. */
+.theme-toggle {
+  border: 1px solid var(--border);
+  background: var(--canvas);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+}
+
+.theme-toggle:hover {
+  background: var(--surface);
+}
+
+/* Правая колонка на странице товаров (форма + категории). */
+.products-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cat-manager {
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cat-manager h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.cat-manager__add {
+  display: flex;
+  gap: 8px;
+}
+
+.cat-manager__add input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--canvas);
+  color: var(--text);
+}
+
+.cat-manager__add .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cat-list__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cat-list__row:last-child {
+  border-bottom: none;
 }
